@@ -346,3 +346,12 @@ Podés encadenar `tyrell` con otras herramientas del ecosistema en una única l�
 tyrell generate --schema schemas/envios.yaml -n 1000 --seed 42 -o testcases/envios.in
 ````
 
+---
+
+(manual-tyrell-seccion-plugins)=
+## 9. Extensión, Desarrollo de Plugins y API Python
+
+Para crear tus propias reglas, conectores de evaluación o integrar `tyrell` programáticamente en pipelines de CI/CD:
+
+- 👉 **Consultá la guía completa:** [Guía de Extensión y Creación de Plugins](plugins.md)
+
