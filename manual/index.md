@@ -174,3 +174,54 @@ check-tyrell:
 ````
 
 Ejecutá `make check-tyrell` antes de cada commit para asegurar que tu código conserve el estado de aprobación.
+
+---
+
+(manual-tyrell-arquitectura)=
+## 7. Arquitectura Interna y Mecanismo Técnico
+
+La herramienta **`tyrell`** implementa un motor de alta precisión basado en:
+
+- **Tecnología Núcleo:** `Mersenne Twister / PCG Deterministic RNG + Schema-Driven Data Generator + SHA-256 Checksum Validator`.
+- **Aislamiento y Determinismo:** Diseñada para operar sin efectos colaterales en entornos de integración continua (CI), terminales de estudiantes y servidores docentes headless.
+- **Manejo de Errores Pedagógico:** Todo fallo de sintaxis, memoria o lógica se traduce en una acción prescriptiva concreta con su respectiva justificación técnica.
+
+---
+
+(manual-tyrell-ecosistema)=
+## 8. Integración y Conexión con el Ecosistema
+
+````{note}
+Ninguna herramienta opera de forma aislada. **`tyrell`** forma parte del pipeline integral de evaluación, verificación y enseñanza de la cátedra.
+````
+
+### Diagrama de Flujo e Interoperabilidad
+
+````{mermaid}
+graph TD
+    SCH[Esquemas YAML: Tipos y Rangos] --> TYR[Tyrell: Generador Sintético]
+    TYR -->|Generación Determinista con Semilla| RNG[Mersenne Twister PRNG]
+    TYR -->|Datasets Masivos .in| NOS[Nostromo: Sandbox y Test Runner]
+    TYR -->|Cargas de Estrés| FRR[Ferro: Perfilador de Rendimiento]
+    TYR -->|Casos de Prueba| DRD[Dredd: Autograding Masivo]
+````
+
+### Matriz de Intercambio de Datos
+
+| Canal | Herramientas Conectadas | Tipo de Datos Transferidos |
+| :--- | :--- | :--- |
+| **Entradas (Inputs)** | - `Esquemas YAML de datos y semillas fijas` | Código fuente, AST, binarios, testcases, contratos |
+| **Salidas (Outputs)** | - `nostromo (testcases .in)`
+- `ferro (benchmarking)`
+- `dredd (evaluación masiva)` | Informes Markdown, diagnósticos Rich, JSON, actas |
+| **Sincronización** | `nostromo`, `drake`, `ferro` | Validación cruzada, flags compartidos y autofix |
+
+### Pipeline de Integración Recomendado
+
+Podés encadenar `tyrell` con otras herramientas del ecosistema en una única línea de comando:
+
+````{code-block} bash
+# Pipeline de integración típico
+tyrell generate --schema schemas/envios.yaml -n 1000 --seed 42 -o testcases/envios.in
+````
+
