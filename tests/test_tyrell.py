@@ -71,3 +71,16 @@ def test_ripley_plugin(tmp_path):
     res = plugin.run({"testcases_count": 3, "testcases_dir": str(tmp_path / "ripley_tests")})
     assert res["passed"] is True
     assert res["generated_count"] == 3
+
+
+def test_cli_doctor():
+    res = runner.invoke(app, ["doctor"])
+    assert res.exit_code == 0
+    assert "Diagnóstico del Entorno TYRELL" in res.output
+
+    res_json = runner.invoke(app, ["doctor", "--json"])
+    assert res_json.exit_code == 0
+    assert '"schema_version": "1.0.0"' in res_json.output
+    assert '"herramienta": "tyrell"' in res_json.output
+    assert '"ok": true' in res_json.output
+
