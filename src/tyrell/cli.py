@@ -17,10 +17,12 @@ app = typer.Typer(
     add_completion=True
 )
 console = Console()
+err_console = Console(stderr=True)
 
 
 @app.command()
 def generate(
+    ctx: typer.Context,
     spec_file: Optional[Path] = typer.Argument(None, help="Archivo YAML de especificación de dataset"),
     count: int = typer.Option(10, "--count", "-n", help="Cantidad de casos de prueba a generar"),
     seed: int = typer.Option(42, "--seed", "-s", help="Semilla para reproducibilidad"),
@@ -31,10 +33,39 @@ def generate(
     reference_binary: Optional[Path] = typer.Option(None, "--reference", "-r", help="Binario ejecutable de referencia para generar los .out"),
     json_output: bool = typer.Option(False, "--json", help="Emitir salida en formato JSON estructurado")
 ):
-    """Genera casos de prueba .in (y .out con binario de referencia) deterministas."""
-    if spec_file and spec_file.exists():
-        raw_yaml = yaml.safe_load(spec_file.read_text(encoding="utf-8"))
-        spec = DatasetSpec(**raw_yaml)
+    """Genera casos de prueba .in (y .out con binario de referencia) deterministas.
+
+    Con un YAML, la especificación manda: `--count`, `--seed`, `--type`, `--min`
+    y `--max` se ignoran (se avisa cuáles). Sin YAML se usan esas opciones.
+    """
+    if spec_file is not None:
+        if not spec_file.is_file():
+            # Antes caía al dataset por defecto con exit 0, y el usuario creía
+            # haber generado desde su YAML.
+            err_console.print(f"[bold red]No existe el archivo de especificación:[/bold red] {spec_file}")
+            raise typer.Exit(code=2)
+
+        try:
+            raw_yaml = yaml.safe_load(spec_file.read_text(encoding="utf-8"))
+            if not isinstance(raw_yaml, dict):
+                raise ValueError("el YAML debe ser un mapa con las claves de la especificación")
+            spec = DatasetSpec(**raw_yaml)
+        except (yaml.YAMLError, ValueError, TypeError) as exc:
+            err_console.print(f"[bold red]Especificación inválida en {spec_file}:[/bold red]\n{exc}")
+            raise typer.Exit(code=2)
+
+        ignoradas = [
+            f"--{nombre}"
+            for nombre in ("count", "seed", "type_name", "min_val", "max_val")
+            # Se compara por nombre para no depender de importar `click`, que
+            # typer trae integrado y no es una dependencia declarada de tyrell.
+            if getattr(ctx.get_parameter_source(nombre), "name", "") == "COMMANDLINE"
+        ]
+        if ignoradas:
+            err_console.print(
+                f"[yellow]Aviso:[/yellow] con un YAML la especificación tiene precedencia; "
+                f"se ignoran {', '.join(ignoradas).replace('type_name', 'type').replace('min_val', 'min').replace('max_val', 'max')}."
+            )
     else:
         spec = DatasetSpec(
             name="case",
