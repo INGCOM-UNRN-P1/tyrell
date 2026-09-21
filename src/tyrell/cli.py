@@ -92,7 +92,14 @@ def generate(
             rules=[DatasetRule(name="val", type=type_name, min_val=min_val, max_val=max_val)]
         )
 
-    testcases = generate_dataset(spec, output_dir=output_dir, reference_binary=reference_binary)
+    try:
+        testcases = generate_dataset(spec, output_dir=output_dir, reference_binary=reference_binary)
+    except FileNotFoundError as exc:
+        err_console.print(f"[bold red]{exc}[/bold red]")
+        raise typer.Exit(code=2)
+    for tc in testcases:
+        if tc.advertencia:
+            err_console.print(f"[yellow]Aviso caso {tc.index}:[/yellow] {tc.advertencia}")
 
     if json_output:
         data = [tc.model_dump() for tc in testcases]

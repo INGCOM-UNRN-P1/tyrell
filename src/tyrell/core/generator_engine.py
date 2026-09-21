@@ -50,21 +50,24 @@ def generate_dataset(
     reference_binary: Optional[Path] = None
 ) -> List[GeneratedTestCase]:
     """Genera una colección completa de casos de prueba deterministas."""
+    if reference_binary is not None and not reference_binary.exists():
+        # Antes no se escribía ningún `.out` y nada lo avisaba.
+        raise FileNotFoundError(f"El binario de referencia no existe: {reference_binary}")
     rng = random.Random(spec.seed)
     testcases: List[GeneratedTestCase] = []
 
     for i in range(1, spec.count + 1):
-        # Primeros casos son casos borde extremos si include_extremes está activo
-        is_edge = (i <= 2)
+        # Los dos primeros casos son de borde, salvo en las reglas con include_extremes=False
+        es_caso_borde = (i <= 2)
         values: Dict[str, Any] = {}
 
         if not spec.rules:
             # Regla por defecto (entero)
-            val = generate_value(DatasetRule(name="x", type="integer", min_val=1, max_val=100), rng, is_edge)
+            val = generate_value(DatasetRule(name="x", type="integer", min_val=1, max_val=100), rng, es_caso_borde)
             content = f"{val}\n"
         else:
             for r in spec.rules:
-                val = generate_value(r, rng, is_edge)
+                val = generate_value(r, rng, es_caso_borde and r.include_extremes)
                 if isinstance(val, list):
                     values[r.name] = " ".join(str(x) for x in val)
                 else:
@@ -77,8 +80,9 @@ def generate_dataset(
         in_name = f"{i:02d}_{spec.name}.in"
         out_name = f"{i:02d}_{spec.name}.out" if reference_binary else None
         output_str = None
+        advertencia = None
 
-        if reference_binary and reference_binary.exists():
+        if reference_binary:
             try:
                 res = subprocess.run(
                     [str(reference_binary)],
@@ -89,15 +93,18 @@ def generate_dataset(
                     check=False
                 )
                 output_str = res.stdout
-            except Exception:
-                output_str = ""
+            except Exception as exc:
+                # No se inventa un `.out` vacío: el caso queda sin salida esperada y se avisa.
+                out_name = None
+                advertencia = f"la referencia falló para este caso ({type(exc).__name__}); no se escribió el .out"
 
         tc = GeneratedTestCase(
             index=i,
             input_content=content,
             output_content=output_str,
             in_filename=in_name,
-            out_filename=out_name
+            out_filename=out_name,
+            advertencia=advertencia,
         )
         testcases.append(tc)
 

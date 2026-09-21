@@ -70,3 +70,4 @@ class GeneratedTestCase(BaseModel):
     output_content: Optional[str] = None
     in_filename: str
     out_filename: Optional[str] = None
+    advertencia: Optional[str] = None
