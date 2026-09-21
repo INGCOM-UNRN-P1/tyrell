@@ -23,7 +23,7 @@ err_console = Console(stderr=True)
 def _version_callback(value: bool) -> None:
     if value:
         from tyrell import __version__
-        console.print(f"[bold cyan]TYRELL[/bold cyan] versión [bold]{__version__}[/bold]")
+        typer.echo(f"TYRELL versión {__version__}")
         raise typer.Exit(code=0)
 
 
