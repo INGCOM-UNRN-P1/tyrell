@@ -80,3 +80,10 @@ def test_un_binario_con_un_defecto_falla_algun_caso_de_la_suite_generada(tmp_pat
     generate_dataset(spec, output_dir=suite, reference_binary=ref_bin)
     reporte = nostromo.evaluar_binario(mala_bin, nostromo.descubrir_casos_prueba(suite), integrar_hal=False)
     assert reporte.casos_fallidos > 0
+
+
+def test_el_readme_no_promete_integracion_automatica_con_orquestadores():
+    """TYRELL-D0902: ningún orquestador invoca a tyrell; el README lo dice sin ambigüedad."""
+    from pathlib import Path
+    texto = (Path(__file__).resolve().parents[1] / "README.md").read_text(encoding="utf-8")
+    assert "No hay integración automática" in texto
