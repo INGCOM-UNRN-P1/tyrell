@@ -12,6 +12,7 @@ from tyrell.core.models import DatasetSpec, DatasetRule
 from tyrell.core.generator_engine import generate_dataset
 
 app = typer.Typer(
+    context_settings={"help_option_names": ["-h", "--help"]},
     name="tyrell",
     help="Generador sintético y determinista de datasets y casos de prueba (.in/.out)",
     add_completion=True
