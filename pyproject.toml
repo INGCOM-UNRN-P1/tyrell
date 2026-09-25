@@ -46,12 +46,12 @@ tyrell = "tyrell.cli:app"
 [project.entry-points."ripley.plugins"]
 dataset_generator = "tyrell.plugins.ripley_plugin:TyrellPlugin"
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.4.0",
-]
-
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 pythonpath = ["src"]
+
+[dependency-groups]
+dev = [
+    "pytest>=7.4.0",
+]
