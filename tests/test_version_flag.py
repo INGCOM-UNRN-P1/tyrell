@@ -19,7 +19,7 @@ runner = CliRunner()
 def test_la_opcion_version_imprime_la_del_paquete_y_sale_con_0(opcion):
     res = runner.invoke(app, [opcion])
     assert res.exit_code == 0
-    assert "TYRELL" in res.output
+    assert res.output.startswith("tyrell ")  # formato común de yutani: «nombre versión»
     assert version("tyrell") in res.output
 
 

@@ -4,38 +4,26 @@ import json
 from pathlib import Path
 from typing import Optional
 import typer
+from yutani.cli import crear_app
 import yaml
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
+from tyrell import __version__
 from tyrell.core.models import DatasetSpec, DatasetRule
 from tyrell.core.generator_engine import generate_dataset
 
-app = typer.Typer(
-    context_settings={"help_option_names": ["-h", "--help"]},
-    name="tyrell",
-    help="Generador sintético y determinista de datasets y casos de prueba (.in/.out)",
-    add_completion=True
+# Contrato de línea de comandos del ecosistema (-h/--help, --version/-v, errores de datos como
+# mensajes) y textos de Typer en español, desde yutani (N-ECO-14).
+app = crear_app(
+    "tyrell",
+    __version__,
+    "Generador sintético y determinista de datasets y casos de prueba (.in/.out)",
+    add_completion=True,
+    no_args_is_help=False,
 )
 console = Console()
 err_console = Console(stderr=True)
-
-
-def _version_callback(value: bool) -> None:
-    if value:
-        from tyrell import __version__
-        typer.echo(f"TYRELL versión {__version__}")
-        raise typer.Exit(code=0)
-
-
-@app.callback()
-def main_callback(
-    version: Optional[bool] = typer.Option(
-        None, "--version", "-v", help="Muestra la versión y termina.",
-        callback=_version_callback, is_eager=True,
-    ),
-) -> None:
-    """Opciones globales."""
 
 
 @app.command()
@@ -179,7 +167,6 @@ def doctor_cmd(
     console.print(tabla)
     if not todo_ok:
         raise typer.Exit(code=1)
-
 
 
 if __name__ == "__main__":
