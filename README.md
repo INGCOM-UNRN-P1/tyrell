@@ -77,3 +77,22 @@ Reglas de validación (se rechaza con código de salida 2 y un mensaje concreto)
 **Precedencia:** con un YAML, la especificación manda. `--count`, `--seed`, `--type`,
 `--min` y `--max` se ignoran (y se avisa cuáles). Sin YAML se usan esas opciones.
 
+<!-- p1:referencia:inicio — generado por p1-tools/scripts/readme_generado.py: no editar a mano -->
+
+## Referencia rápida
+
+### Requisitos
+
+- Python ≥ 3.11 y [uv](https://docs.astral.sh/uv/getting-started/installation/).
+
+### Comandos
+
+| Comando | Descripción |
+|:--|:--|
+| `tyrell generate` | Genera casos de prueba .in (y .out con binario de referencia) deterministas. |
+| `tyrell version` | Muestra la versión de TYRELL. |
+| `tyrell doctor` | Verifica el estado del entorno de TYRELL (Python, GCC opcional). |
+
+Ayuda de cada comando: `tyrell <comando> -h`.
+
+<!-- p1:referencia:fin -->
