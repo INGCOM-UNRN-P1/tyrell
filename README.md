@@ -66,6 +66,24 @@ rules:
     max_val: 9
 ```
 
+Los primeros casos son de **borde** y recorren, en orden, los de cada regla: los límites
+declarados, `0`, `-1`, `1` y sus vecinos (más `INT_MAX` e `INT_MIN` si la regla no declara
+límites); cadenas vacías, con espacios repetidos o al borde, tabulaciones y saltos de línea
+consecutivos; arreglos vacíos, de un elemento, con todos iguales, ordenados y en orden inverso.
+Después vienen los aleatorios.
+
+Opciones de una regla `array`:
+
+- `orden: aleatorio | ordenado | inverso | casi_ordenado` (el peor caso de un quicksort ingenuo);
+- en la plantilla, `{v_n}` es la cantidad de elementos del arreglo `v`: `"{v_n}\n{v}\n"`.
+
+Casos extra al final (también con `--corruptos N` y `--estres LARGO`):
+
+```yaml
+corruptos: 5            # truncadas, con bytes no imprimibles, sin salto final, letras donde van números, vacías
+estres_longitud: 2000000 # un caso con arreglos y cadenas de ese largo (unos 10 MB)
+```
+
 Reglas de validación (se rechaza con código de salida 2 y un mensaje concreto):
 
 - `type` solo admite `integer`, `float`, `string` y `array`.

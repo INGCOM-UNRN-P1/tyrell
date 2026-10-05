@@ -1,7 +1,7 @@
 """Modelos de datos para la generación sintética en TYRELL."""
 
 import string
-from typing import List, Dict, Any, Literal, Optional
+from typing import List, Literal, Optional
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 # Tipos que el motor sabe generar. Antes `type` era un `str` libre: un typo como
@@ -21,6 +21,8 @@ class DatasetRule(BaseModel):
     length: Optional[int] = 10
     include_extremes: bool = True
     charset: Optional[str] = None
+    # Arreglos: `casi_ordenado` es el peor caso de quicksort ingenuo y el mejor de inserción (QoL #977).
+    orden: Literal["aleatorio", "ordenado", "inverso", "casi_ordenado"] = "aleatorio"
 
 
 class DatasetSpec(BaseModel):
@@ -31,6 +33,10 @@ class DatasetSpec(BaseModel):
     seed: int = 42
     format_template: str = "{input}"
     rules: List[DatasetRule] = Field(default_factory=list)
+    # Casos extra al final: entradas corruptas (QoL #973) y uno de estrés con arreglos y cadenas
+    # de esta longitud (QoL #969; 2_000_000 enteros son unos 10 MB).
+    corruptos: int = Field(0, ge=0)
+    estres_longitud: Optional[int] = Field(None, ge=1)
 
     @model_validator(mode="after")
     def _validar_plantilla(self) -> "DatasetSpec":
@@ -45,6 +51,9 @@ class DatasetSpec(BaseModel):
 
         usados = {campo for _, campo, _, _ in string.Formatter().parse(self.format_template) if campo}
         nombres = [r.name for r in self.rules]
+        # `{v_n}` es la cantidad de elementos del arreglo `v`: cuenta como uso de `v`.
+        largos = {f"{r.name}_n": r.name for r in self.rules if r.type == "array"}
+        usados = {largos.get(c, c) for c in usados}
 
         if not usados:
             raise ValueError(
@@ -71,3 +80,4 @@ class GeneratedTestCase(BaseModel):
     in_filename: str
     out_filename: Optional[str] = None
     advertencia: Optional[str] = None
+    tipo: Literal["normal", "borde", "corrupto", "estres"] = "normal"

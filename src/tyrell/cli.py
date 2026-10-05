@@ -37,7 +37,9 @@ def generate(
     max_val: int = typer.Option(100, "--max", help="Valor máximo"),
     output_dir: Path = typer.Option(Path("tests"), "--output", "-o", help="Directorio de destino de los archivos .in/.out"),
     reference_binary: Optional[Path] = typer.Option(None, "--reference", "-r", help="Binario ejecutable de referencia para generar los .out"),
-    json_output: bool = typer.Option(False, "--json", help="Emitir salida en formato JSON estructurado")
+    json_output: bool = typer.Option(False, "--json", help="Emitir salida en formato JSON estructurado"),
+    corruptos: int = typer.Option(0, "--corruptos", min=0, help="Sumar N casos con entradas corruptas (truncadas, bytes no imprimibles, letras donde van números)."),
+    estres: Optional[int] = typer.Option(None, "--estres", min=1, help="Sumar un caso de estrés con arreglos y cadenas de esta longitud."),
 ):
     """Genera casos de prueba .in (y .out con binario de referencia) deterministas.
 
@@ -80,6 +82,10 @@ def generate(
             format_template="{val}\n",
             rules=[DatasetRule(name="val", type=type_name, min_val=min_val, max_val=max_val)]
         )
+    if corruptos or estres:
+        # También con YAML: son casos que se suman, no cambian la especificación.
+        spec = spec.model_copy(update={"corruptos": corruptos or spec.corruptos,
+                                       "estres_longitud": estres or spec.estres_longitud})
 
     try:
         testcases = generate_dataset(spec, output_dir=output_dir, reference_binary=reference_binary)
@@ -98,13 +104,14 @@ def generate(
     table = Table(title=f"Casos de Prueba Generados ({len(testcases)} archivos)", show_header=True, header_style="bold green")
     table.add_column("#", style="cyan", width=4)
     table.add_column("Archivo .in", style="yellow")
+    table.add_column("Tipo", style="magenta")
     table.add_column("Payload (preview)", style="white")
     table.add_column("Archivo .out", style="blue")
 
     for tc in testcases:
         preview = repr(tc.input_content[:30])
         out_col = tc.out_filename if tc.out_filename else "[dim]N/A (sin binario)[/dim]"
-        table.add_row(str(tc.index), tc.in_filename, preview, out_col)
+        table.add_row(str(tc.index), tc.in_filename, tc.tipo, preview, out_col)
 
     console.print(table)
     console.print(f"\n[bold green]✓ {len(testcases)} testcases guardados exitosamente en:[/bold green] {output_dir}")
