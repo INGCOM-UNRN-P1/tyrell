@@ -41,7 +41,7 @@ def test_casi_ordenado():
                        orden="casi_ordenado", include_extremes=False)
     (caso,) = generate_dataset(DatasetSpec(count=1, format_template="{v}", rules=[rule]))
     v = [int(x) for x in caso.input_content.split()]
-    fuera_de_lugar = sum(1 for a, b in zip(v, v[1:]) if a > b)
+    fuera_de_lugar = sum(1 for a, b in zip(v, v[1:], strict=False) if a > b)
     assert v != sorted(v) and 0 < fuera_de_lugar <= 20
 
 

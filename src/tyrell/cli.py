@@ -60,7 +60,7 @@ def generate(
             spec = DatasetSpec(**raw_yaml)
         except (yaml.YAMLError, ValueError, TypeError) as exc:
             err_console.print(f"[bold red]Especificación inválida en {spec_file}:[/bold red]\n{exc}")
-            raise typer.Exit(code=2)
+            raise typer.Exit(code=2) from exc
 
         ignoradas = [
             f"--{nombre}"
@@ -91,7 +91,7 @@ def generate(
         testcases = generate_dataset(spec, output_dir=output_dir, reference_binary=reference_binary)
     except FileNotFoundError as exc:
         err_console.print(f"[bold red]{exc}[/bold red]")
-        raise typer.Exit(code=2)
+        raise typer.Exit(code=2) from exc
     for tc in testcases:
         if tc.advertencia:
             err_console.print(f"[yellow]Aviso caso {tc.index}:[/yellow] {tc.advertencia}")
