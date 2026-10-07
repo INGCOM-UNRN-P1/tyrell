@@ -31,9 +31,9 @@ def bordes(rule: DatasetRule) -> List[Any]:
             candidatos = [v for v in candidatos if min_v <= v <= max_v]
         return list(dict.fromkeys(candidatos))
     if t in ("float", "double"):
-        min_v = float(rule.min_val) if rule.min_val is not None else -1000.0
-        max_v = float(rule.max_val) if rule.max_val is not None else 1000.0
-        return list(dict.fromkeys([min_v, max_v, 0.0, -1.0, 1.0, 1e-6]))
+        min_f = float(rule.min_val) if rule.min_val is not None else -1000.0
+        max_f = float(rule.max_val) if rule.max_val is not None else 1000.0
+        return list(dict.fromkeys([min_f, max_f, 0.0, -1.0, 1.0, 1e-6]))
     if t == "string":
         return _BORDES_CADENA + ["A" * (rule.length or 10)]
     if t == "array":
@@ -72,9 +72,9 @@ def generate_value(rule: DatasetRule, rng: random.Random, is_edge_case: bool = F
         return rng.randint(min_v, max_v)
 
     elif t in ("float", "double"):
-        min_v = rule.min_val if rule.min_val is not None else -1000.0
-        max_v = rule.max_val if rule.max_val is not None else 1000.0
-        return round(rng.uniform(min_v, max_v), 4)
+        min_f = rule.min_val if rule.min_val is not None else -1000.0
+        max_f = rule.max_val if rule.max_val is not None else 1000.0
+        return round(rng.uniform(min_f, max_f), 4)
 
     elif t == "string":
         chars = rule.charset or (string.ascii_letters + string.digits)
